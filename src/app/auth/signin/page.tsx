@@ -12,7 +12,7 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 const SignInSchema = z.object({
-  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  email: z.email("Invalid email address").min(1, "Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -20,6 +20,7 @@ type SignInForm = z.infer<typeof SignInSchema>;
 
 const SignInPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+  // const [isSuccess, setIsSuccess] = useState(false);
   const {
     register,
     handleSubmit,
@@ -33,23 +34,28 @@ const SignInPage = () => {
     setIsLoading(true);
 
     try {
-      await authClient.signIn.email({
-        ...data,
-        fetchOptions: {
-          onResponse: () => {
-            setIsLoading(false);
-          },
+      await authClient.signIn.email(
+        {
+          email: data.email,
+          password: data.password,
+        },
+        {
           onRequest: () => {
             setIsLoading(true);
+          },
+          onResponse: () => {
+            setIsLoading(false);
           },
           onError: (ctx) => {
             toast.error(ctx.error.message);
           },
           onSuccess: async () => {
+            toast.success("Signed in successfully!");
+            // setIsSuccess(true);
             router.replace("/");
           },
-        },
-      });
+        }
+      );
     } catch (error) {
       console.error("An error occurred during sign-in:", error);
     } finally {

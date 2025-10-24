@@ -1,33 +1,18 @@
 import Link from "next/link";
 import { getServerSession } from "@/actions/auth";
 import SignOutButton from "@/components/signOutButton";
-// import { useRouter } from "next/navigation";
 export default async function Home() {
   // Fetch current user session (BetterAuth helper)
   const session = await getServerSession();
-  // const router = useRouter();
-  // async function handleSignOut() {
-  //   await fetch("/api/auth/sign-out", { method: "POST" });
-  //   router.push("/auth/login"); // or homepage
-  // }
-
   return (
     <main className="flex flex-col items-center h-screen justify-center gap-3">
       {session ? (
         <>
           <h1 className="text-2xl font-bold">
-            Welcome, {session.user.name} 👋
+            Welcome, {session?.user.name ?? "Guest"} 👋
           </h1>
           <p className="text-gray-600">You’re now logged in!</p>
 
-          {/* <form onSubmit={handleSignOut}> */}
-          {/* <button
-            onClick={() => signOutServerAction()}
-            className="bg-red-600 text-white px-4 py-2 rounded-xl"
-          >
-            Logout
-          </button> */}
-          {/* </form> */}
           <SignOutButton />
         </>
       ) : (

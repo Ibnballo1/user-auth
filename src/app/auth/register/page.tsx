@@ -11,9 +11,9 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 
 const RegisterSchema = z.object({
-  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  email: z.email("Invalid email address entered").min(1, "Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(3, "Name is required and at least 3 characters"),
 });
 
 type RegisterForm = z.infer<typeof RegisterSchema>;
@@ -33,25 +33,31 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      await authClient.signUp.email({
-        ...data,
-        fetchOptions: {
-          onResponse: () => {
-            setIsLoading(false);
-          },
+      await authClient.signUp.email(
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        },
+        {
           onRequest: () => {
             setIsLoading(true);
           },
+          onResponse: () => {
+            setIsLoading(false);
+          },
           onError: (ctx) => {
-            toast.error(ctx.error.message);
+            toast.error(ctx.error.message || "Something went wrong!");
           },
           onSuccess: async () => {
-            router.replace("/");
+            toast.success("Registration successful!");
+            router.replace("/auth/signin");
           },
-        },
-      });
+        }
+      );
     } catch (error) {
       console.error("An error occurred during registration:", error);
+      toast.error("Unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
